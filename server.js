@@ -1,12 +1,22 @@
 const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
+const nodemailer = require('nodemailer');
+const Archiver = require('archiver');
+const ArchiverZipEncrypted = require('archiver-zip-encrypted');
 
 // Optional local .env support (Render injects env vars directly)
 try {
   require('dotenv').config();
 } catch (_) {
   // dotenv is optional in production if env vars are set by the host
+}
+
+// Register encrypted zip format once
+try {
+  Archiver.registerFormat('zip-encrypted', ArchiverZipEncrypted);
+} catch (_) {
+  // already registered (e.g. hot reload)
 }
 
 const app = express();
@@ -16,9 +26,37 @@ const DATABASE_URL = process.env.DATABASE_URL;
 const EXPORT_API_KEY = process.env.EXPORT_API_KEY || '';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// SMTP / notification settings
+const SMTP_HOST = process.env.SMTP_HOST || '';
+const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
+const SMTP_SECURE = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASS = process.env.SMTP_PASS || '';
+const SMTP_FROM = process.env.SMTP_FROM || SMTP_USER || 'noreply@mindyou.local';
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'mindyou968@gmail.com';
+
 if (!DATABASE_URL) {
   console.error('Missing DATABASE_URL. Set it in your environment or .env file.');
   process.exit(1);
+}
+
+const mailerConfigured = Boolean(SMTP_HOST && SMTP_USER && SMTP_PASS && EXPORT_API_KEY);
+let mailTransporter = null;
+
+function getMailTransporter() {
+  if (!mailerConfigured) return null;
+  if (!mailTransporter) {
+    mailTransporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE || SMTP_PORT === 465,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS
+      }
+    });
+  }
+  return mailTransporter;
 }
 
 const pool = new Pool({
@@ -228,6 +266,167 @@ function toCsvLine(values) {
   );
 }
 
+const REGISTRATION_CSV_HEADERS = [
+  'ID',
+  'Timestamp',
+  'Full Name (Inc. Middle)',
+  'Email Address',
+  'Phone Number',
+  'Country of Residence',
+  'Age Range',
+  'Gender',
+  'Audience Category',
+  'Audience Category (Other)',
+  'Religion / Faith Background',
+  'Religion / Faith Background (Other)',
+  'Referral Channel',
+  'Referral Channel (Other)',
+  'Registration Reasons',
+  'Registration Reasons (Other)',
+  'Topic of Interest',
+  'Speaker Question',
+  'Attended Webinar Before',
+  'Pre-Assessment Q1',
+  'Pre-Assessment Q2',
+  'Pre-Assessment Q3',
+  'Pre-Assessment Q4',
+  'Pre-Assessment Q5',
+  'Consent: Marketing & Resources',
+  'Consent: Recording'
+];
+
+function registrationRowToCsvValues(row) {
+  return [
+    row.id,
+    row.created_at ? new Date(row.created_at).toISOString() : '',
+    row.full_name,
+    row.email,
+    row.phone,
+    row.country,
+    row.age_range,
+    row.gender || '',
+    row.audience_category,
+    row.audience_category_other || '',
+    row.religion,
+    row.religion_other || '',
+    row.referral_channel,
+    row.referral_channel_other || '',
+    row.registration_reasons,
+    row.registration_reasons_other || '',
+    row.topic_of_interest,
+    row.speaker_question || '',
+    row.attended_before,
+    row.pre_assessment_q1,
+    row.pre_assessment_q2,
+    row.pre_assessment_q3,
+    row.pre_assessment_q4,
+    row.pre_assessment_q5,
+    row.consent_updates ? 'Yes' : 'No',
+    row.consent_recording ? 'Yes' : 'No'
+  ];
+}
+
+function buildRegistrationCsv(row) {
+  return toCsvLine(REGISTRATION_CSV_HEADERS) + toCsvLine(registrationRowToCsvValues(row));
+}
+
+function sanitizeFilenamePart(value) {
+  return String(value || 'user')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'user';
+}
+
+function createPasswordProtectedZip(csvContent, csvFilename, password) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    const archive = Archiver.create('zip-encrypted', {
+      zlib: { level: 9 },
+      encryptionMethod: 'aes256',
+      password
+    });
+
+    archive.on('data', (chunk) => chunks.push(chunk));
+    archive.on('error', reject);
+    archive.on('end', () => resolve(Buffer.concat(chunks)));
+
+    archive.append(csvContent, { name: csvFilename });
+    archive.finalize();
+  });
+}
+
+async function sendRegistrationEmail(row) {
+  const transporter = getMailTransporter();
+  if (!transporter) {
+    console.warn('Registration email skipped: SMTP or EXPORT_API_KEY not configured.');
+    return { skipped: true };
+  }
+
+  const stamp = row.created_at
+    ? new Date(row.created_at).toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    : new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const safeName = sanitizeFilenamePart(row.full_name);
+  const csvFilename = `registration-${row.id}-${safeName}.csv`;
+  const zipFilename = `registration-${row.id}-${safeName}-${stamp}.zip`;
+  const csvContent = buildRegistrationCsv(row);
+  const zipBuffer = await createPasswordProtectedZip(csvContent, csvFilename, EXPORT_API_KEY);
+
+  const info = await transporter.sendMail({
+    from: SMTP_FROM,
+    to: NOTIFY_EMAIL,
+    subject: `New Mind You registration #${row.id} — ${row.full_name}`,
+    text: [
+      'A new webinar registration was received.',
+      '',
+      `ID: ${row.id}`,
+      `Name: ${row.full_name}`,
+      `Email: ${row.email}`,
+      `Phone: ${row.phone}`,
+      `Country: ${row.country}`,
+      `Topic: ${row.topic_of_interest}`,
+      `Submitted: ${row.created_at ? new Date(row.created_at).toISOString() : ''}`,
+      '',
+      'A password-protected ZIP of this registrant CSV is attached.',
+      'ZIP password = EXPORT_API_KEY from your environment.'
+    ].join('\n'),
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.5;color:#123;">
+        <h2 style="margin:0 0 12px;">New Mind You registration</h2>
+        <p style="margin:0 0 16px;">A new webinar registration was received.</p>
+        <table style="border-collapse:collapse;width:100%;max-width:560px;">
+          <tr><td style="padding:6px 0;font-weight:bold;">ID</td><td style="padding:6px 0;">${row.id}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;">Name</td><td style="padding:6px 0;">${escapeHtml(row.full_name)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;">Email</td><td style="padding:6px 0;">${escapeHtml(row.email)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;">Phone</td><td style="padding:6px 0;">${escapeHtml(row.phone)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;">Country</td><td style="padding:6px 0;">${escapeHtml(row.country)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;">Topic</td><td style="padding:6px 0;">${escapeHtml(row.topic_of_interest)}</td></tr>
+        </table>
+        <p style="margin:16px 0 0;">A password-protected ZIP of this registrant CSV is attached.</p>
+        <p style="margin:8px 0 0;color:#555;">ZIP password = <code>EXPORT_API_KEY</code> from your environment.</p>
+      </div>
+    `,
+    attachments: [
+      {
+        filename: zipFilename,
+        content: zipBuffer,
+        contentType: 'application/zip'
+      }
+    ]
+  });
+
+  return { skipped: false, messageId: info.messageId };
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildRegistrationRecord(data) {
   if (!data || typeof data !== 'object') {
     throw new Error('Invalid request payload format.');
@@ -399,7 +598,7 @@ app.post('/api/register', rateLimiter, async (req, res) => {
   try {
     const record = buildRegistrationRecord(req.body);
 
-    await pool.query(
+    const insertResult = await pool.query(
       `INSERT INTO registrations (
         full_name, email, phone, country, age_range, gender,
         audience_category, audience_category_other,
@@ -420,7 +619,8 @@ app.post('/api/register', rateLimiter, async (req, res) => {
         $18,$19,$20,
         $21,$22,
         $23,$24
-      )`,
+      )
+      RETURNING *`,
       [
         record.fullName,
         record.email,
@@ -449,9 +649,24 @@ app.post('/api/register', rateLimiter, async (req, res) => {
       ]
     );
 
+    const savedRow = insertResult.rows[0];
+
+    // Respond first so the user is not blocked by SMTP latency.
     res.status(200).json({
       success: true,
       message: 'Registration completed successfully.'
+    });
+
+    // Fire-and-forget notification email with password-protected CSV zip.
+    setImmediate(() => {
+      sendRegistrationEmail(savedRow)
+        .then((result) => {
+          if (result?.skipped) return;
+          console.log(`Registration email sent for #${savedRow.id} -> ${NOTIFY_EMAIL}`);
+        })
+        .catch((error) => {
+          console.error(`Registration email failed for #${savedRow.id}:`, error.message);
+        });
     });
   } catch (error) {
     const status = /required|Invalid|must be|format/i.test(error.message || '') ? 400 : 500;
@@ -500,35 +715,6 @@ app.get('/api/export', requireExportAuth, async (req, res) => {
       ORDER BY created_at DESC
     `);
 
-    const headers = [
-      'ID',
-      'Timestamp',
-      'Full Name (Inc. Middle)',
-      'Email Address',
-      'Phone Number',
-      'Country of Residence',
-      'Age Range',
-      'Gender',
-      'Audience Category',
-      'Audience Category (Other)',
-      'Religion / Faith Background',
-      'Religion / Faith Background (Other)',
-      'Referral Channel',
-      'Referral Channel (Other)',
-      'Registration Reasons',
-      'Registration Reasons (Other)',
-      'Topic of Interest',
-      'Speaker Question',
-      'Attended Webinar Before',
-      'Pre-Assessment Q1',
-      'Pre-Assessment Q2',
-      'Pre-Assessment Q3',
-      'Pre-Assessment Q4',
-      'Pre-Assessment Q5',
-      'Consent: Marketing & Resources',
-      'Consent: Recording'
-    ];
-
     const format = String(req.query.format || 'csv').toLowerCase();
 
     if (format === 'json') {
@@ -539,36 +725,9 @@ app.get('/api/export', requireExportAuth, async (req, res) => {
       });
     }
 
-    let csv = toCsvLine(headers);
+    let csv = toCsvLine(REGISTRATION_CSV_HEADERS);
     for (const row of result.rows) {
-      csv += toCsvLine([
-        row.id,
-        row.created_at ? new Date(row.created_at).toISOString() : '',
-        row.full_name,
-        row.email,
-        row.phone,
-        row.country,
-        row.age_range,
-        row.gender || '',
-        row.audience_category,
-        row.audience_category_other || '',
-        row.religion,
-        row.religion_other || '',
-        row.referral_channel,
-        row.referral_channel_other || '',
-        row.registration_reasons,
-        row.registration_reasons_other || '',
-        row.topic_of_interest,
-        row.speaker_question || '',
-        row.attended_before,
-        row.pre_assessment_q1,
-        row.pre_assessment_q2,
-        row.pre_assessment_q3,
-        row.pre_assessment_q4,
-        row.pre_assessment_q5,
-        row.consent_updates ? 'Yes' : 'No',
-        row.consent_recording ? 'Yes' : 'No'
-      ]);
+      csv += toCsvLine(registrationRowToCsvValues(row));
     }
 
     const stamp = new Date().toISOString().slice(0, 10);
@@ -598,6 +757,13 @@ async function start() {
       console.log(`Mind You Mental Health server running at http://${HOST}:${PORT}`);
       console.log(`Database: connected`);
       console.log(`Export: ${EXPORT_API_KEY ? 'enabled (/api/export)' : 'disabled (set EXPORT_API_KEY)'}`);
+      console.log(
+        `Email notify: ${
+          mailerConfigured
+            ? `enabled -> ${NOTIFY_EMAIL} via ${SMTP_HOST}:${SMTP_PORT}`
+            : 'disabled (set SMTP_HOST, SMTP_USER, SMTP_PASS, EXPORT_API_KEY)'
+        }`
+      );
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);
