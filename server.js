@@ -33,13 +33,28 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000
 });
 
-const ALLOWED_TOPICS = [
-  'Can a Christian struggle with mental illness?',
-  'What is mental illness? What causes it, and how can I recognize it?',
-  'Should Christians seek therapy or other professional mental health support?',
-  'How can churches, families, and Christian communities support people living with mental illness?',
-  'Can people recover from mental illness? Is there hope for healing?'
-];
+// Stable topic IDs (preferred) + full labels (accepted for backward compatibility)
+const TOPIC_OPTIONS = {
+  'topic-1': 'Can a Christian struggle with mental illness?',
+  'topic-2': 'What is mental illness? What causes it, and how can I recognize it?',
+  'topic-3': 'Should Christians seek therapy or other professional mental health support?',
+  'topic-4': 'How can churches, families, and Christian communities support people living with mental illness?',
+  'topic-5': 'Can people recover from mental illness? Is there hope for healing?'
+};
+
+const ALLOWED_TOPICS = new Set([
+  ...Object.keys(TOPIC_OPTIONS),
+  ...Object.values(TOPIC_OPTIONS)
+]);
+
+function normalizeTopicOfInterest(raw) {
+  const topic = validateString(raw, 'Topic of Interest', 1, 200, true);
+  if (!ALLOWED_TOPICS.has(topic)) {
+    throw new Error('Invalid Topic of Interest selection.');
+  }
+  // Always store the human-readable label in the database/export
+  return TOPIC_OPTIONS[topic] || topic;
+}
 
 async function initDatabase() {
   const client = await pool.connect();
@@ -314,10 +329,7 @@ function buildRegistrationRecord(data) {
     ? validateString(data.reasonsOther, 'Registration reason details', 1, 150, true)
     : '';
 
-  const topicOfInterest = validateString(data.topicOfInterest, 'Topic of Interest', 5, 200, true);
-  if (!ALLOWED_TOPICS.includes(topicOfInterest)) {
-    throw new Error('Invalid Topic of Interest selection.');
-  }
+  const topicOfInterest = normalizeTopicOfInterest(data.topicOfInterest);
 
   const speakerQuestion = validateString(data.speakerQuestion, 'Question for speakers', 0, 500, false);
 
