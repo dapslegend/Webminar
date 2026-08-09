@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mind You Webinar 2026 — Faith & Mental Health</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="js/three.min.js"></script>
+</head>
+<body>
+  <!-- Ambient Background Aura Glow Orbs -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+  <div class="ambient-glow glow-4"></div>
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <!-- 3D Canvas Background (Organic Breathing Waves & Glass Spheres) -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="theme-badge">
+        <span class="theme-badge-icon" aria-hidden="true">✦</span>
+        <span class="theme-badge-label">Theme &amp; Topic</span>
+        <span class="theme-badge-divider" aria-hidden="true"></span>
+        <span class="theme-badge-text">Faith and Mental Health</span>
+      </div>
+
+      <div class="logo-wrapper">
+        <p class="eyebrow">Mind You Mental Health</p>
+        <h1 class="logo">Mind <span>You</span></h1>
+        <p class="brand-tagline">A webinar series on Faith and Mental Health — myths, support, and hope for healing</p>
+      </div>
+
+      <div class="hero-theme-card">
+        <div class="hero-theme-kicker">Webinar Series 2026 · Session 01</div>
+        <h2 class="hero-theme-title">Faith and Mental Health</h2>
+        <p class="hero-theme-subtitle">Can a Christian struggle with mental illness?</p>
+        <div class="hero-theme-meta">
+          <span>Faith &amp; mental health</span>
+          <span class="meta-dot" aria-hidden="true">·</span>
+          <span>Professional support</span>
+          <span class="meta-dot" aria-hidden="true">·</span>
+          <span>Hope for recovery</span>
+        </div>
+      </div>
+
+      <div class="brand-quotes">
+        <span class="quote-pill">🌿 You're not alone</span>
+        <span class="quote-pill">✨ Faith &amp; mental health can coexist</span>
+        <span class="quote-pill">🤝 Support is available</span>
+      </div>
+    </header>
+
+    <main class="wizard-card">
+      <div id="form-container">
+        <!-- Progress Tracker -->
+        <div class="progress-bar-container">
+          <div class="progress-line">
+            <div class="progress-line-fill" id="progress-line-fill"></div>
+          </div>
+          <div class="step-nodes">
+            <div class="step-node active" data-step="1">1<span class="step-label">Info</span></div>
+            <div class="step-node" data-step="2">2<span class="step-label">Profile</span></div>
+            <div class="step-node" data-step="3">3<span class="step-label">Expects</span></div>
+            <div class="step-node" data-step="4">4<span class="step-label">Survey</span></div>
+            <div class="step-node" data-step="5">5<span class="step-label">Consent</span></div>
+          </div>
+        </div>
+
+        <form id="registration-form" novalidate>
+          
+          <!-- STEP 1: Personal Info -->
+          <div class="form-step active" id="step-1">
+            <div class="step-header">
+              <span class="step-badge">Step 01 of 05</span>
+              <h2 class="step-title">Personal Information</h2>
+              <p class="step-desc">Welcome. Please share your contact and location details to register for this Faith &amp; Mental Health webinar.</p>
+            </div>
+            
+            <div class="form-grid">
+              <div class="input-group">
+                <label for="fullName">Full Name (including Middle Name) <span class="required">*</span></label>
+                <input type="text" id="fullName" name="fullName" placeholder="First, Middle, and Last name" required autocomplete="name">
+                <span class="error-msg" id="error-fullName"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+                <span class="error-msg" id="error-email"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="phone">Phone Number (preferably WhatsApp) <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="+1234567890" required autocomplete="tel">
+                <span class="error-msg" id="error-phone"></span>
+              </div>
+
+              <div class="input-group">
+                <label for="country">Country of Residence <span class="required">*</span></label>
+                <input type="text" id="country" name="country" placeholder="e.g. United Kingdom" required autocomplete="country">
+                <span class="error-msg" id="error-country"></span>
+              </div>
+            </div>
+
+            <div class="form-grid mt-4">
+              <div class="input-group">
+                <label class="label-group-title">Age Range <span class="required">*</span></label>
+                <div class="radio-card-grid">
+                  <label class="option-card">
+                    <input type="radio" name="ageRange" value="Under 18" required>
+                    <span>Under 18</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="ageRange" value="18–24">
+                    <span>18–24</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="ageRange" value="25–34">
+                    <span>25–34</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="ageRange" value="35–44">
+                    <span>35–44</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="ageRange" value="45–54">
+                    <span>45–54</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="ageRange" value="55+">
+                    <span>55+</span>
+                  </label>
+                </div>
+                <span class="error-msg" id="error-ageRange"></span>
+              </div>
+
+              <div class="input-group">
+                <label class="label-group-title">Gender <span class="optional">(Optional)</span></label>
+                <div class="radio-card-grid">
+                  <label class="option-card">
+                    <input type="radio" name="gender" value="Male">
+                    <span>Male</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="gender" value="Female">
+                    <span>Female</span>
+                  </label>
+                  <label class="option-card">
+                    <input type="radio" name="gender" value="Prefer not to say">
+                    <span>Prefer not to say</span>
+                  </label>
+                </div>
+                <span class="error-msg" id="error-gender"></span>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <div></div>
+              <button type="button" class="btn btn-primary btn-next">
+                <span>Continue</span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: About You -->
+          <div class="form-step" id="step-2">
+            <div class="step-header">
+              <span class="step-badge">Step 02 of 05</span>
+              <h2 class="step-title">About You</h2>
+              <p class="step-desc">Tell us a bit about your background so we can better understand who is joining this Faith &amp; Mental Health webinar.</p>
+            </div>
+
+            <div class="input-group">
+              <label class="label-group-title">Which best describes you? <span class="required">*</span></label>
+              <div class="radio-card-list">
+                <label class="option-row">
+                  <input type="radio" name="description" value="Student" required>
+                  <span class="icon-span">🎓</span>
+                  <span class="option-label">Student</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Healthcare Professional">
+                  <span class="icon-span">🩺</span>
+                  <span class="option-label">Healthcare Professional</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Pastor/Church Leader">
+                  <span class="icon-span">🕊️</span>
+                  <span class="option-label">Pastor / Church Leader</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Mental Health Professional">
+                  <span class="icon-span">🧠</span>
+                  <span class="option-label">Mental Health Professional</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Counsellor/Therapist">
+                  <span class="icon-span">💬</span>
+                  <span class="option-label">Counsellor / Therapist</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Teacher/Educator">
+                  <span class="icon-span">📖</span>
+                  <span class="option-label">Teacher / Educator</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Parent">
+                  <span class="icon-span">🏡</span>
+                  <span class="option-label">Parent</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="General Public">
+                  <span class="icon-span">🌟</span>
+                  <span class="option-label">General Public</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="description" value="Other" id="desc-other-radio">
+                  <span class="icon-span">✨</span>
+                  <span class="option-label">Other (please specify below)</span>
+                </label>
+              </div>
+              <span class="error-msg" id="error-description"></span>
+
+              <div class="conditional-input hide" id="desc-other-container">
+                <input type="text" id="descriptionOther" name="descriptionOther" placeholder="Please specify your occupation or role">
+                <span class="error-msg" id="error-descriptionOther"></span>
+              </div>
+            </div>
+
+            <!-- Question 8: Faith & Religion Background -->
+            <div class="input-group mt-4">
+              <label class="label-group-title">What is your religion or faith background? <span class="required">*</span></label>
+              <div class="radio-card-list">
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Christian" required>
+                  <span class="icon-span">✝️</span>
+                  <span class="option-label">Christian</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Muslim">
+                  <span class="icon-span">☪️</span>
+                  <span class="option-label">Muslim</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="African Traditionalist">
+                  <span class="icon-span">🌍</span>
+                  <span class="option-label">African Traditionalist</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Hindu">
+                  <span class="icon-span">🪔</span>
+                  <span class="option-label">Hindu</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Buddhist">
+                  <span class="icon-span">🪷</span>
+                  <span class="option-label">Buddhist</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Jewish">
+                  <span class="icon-span">✡️</span>
+                  <span class="option-label">Jewish</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Agnostic / Atheist">
+                  <span class="icon-span">🌌</span>
+                  <span class="option-label">Agnostic / Atheist</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Prefer not to say">
+                  <span class="icon-span">🔒</span>
+                  <span class="option-label">Prefer not to say</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="religion" value="Other" id="religion-other-radio">
+                  <span class="icon-span">🌿</span>
+                  <span class="option-label">Other (please specify below)</span>
+                </label>
+              </div>
+              <span class="error-msg" id="error-religion"></span>
+
+              <div class="conditional-input hide" id="religion-other-container">
+                <input type="text" id="religionOther" name="religionOther" placeholder="Please specify your religion or faith background">
+                <span class="error-msg" id="error-religionOther"></span>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-secondary btn-prev">Back</button>
+              <button type="button" class="btn btn-primary btn-next">
+                <span>Continue</span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Webinar Expectations -->
+          <div class="form-step" id="step-3">
+            <div class="step-header">
+              <span class="step-badge">Step 03 of 05</span>
+              <h2 class="step-title">Webinar Expectations</h2>
+              <p class="step-desc">Tell us how you heard about Mind You Mental Health and which Faith &amp; Mental Health topic interests you most.</p>
+            </div>
+
+            <div class="input-group">
+              <label class="label-group-title">How did you hear about this webinar? <span class="required">*</span></label>
+              <div class="radio-card-grid">
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="Instagram" required>
+                  <span>Instagram</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="LinkedIn">
+                  <span>LinkedIn</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="Facebook">
+                  <span>Facebook</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="WhatsApp">
+                  <span>WhatsApp</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="Friend/Family">
+                  <span>Friend / Family</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="Church">
+                  <span>Church</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="Speaker">
+                  <span>Speaker</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="referralChannel" value="Other" id="ref-other-radio">
+                  <span>Other</span>
+                </label>
+              </div>
+              <span class="error-msg" id="error-referralChannel"></span>
+
+              <div class="conditional-input hide" id="ref-other-container">
+                <input type="text" id="referralChannelOther" name="referralChannelOther" placeholder="Please specify where you heard about us">
+                <span class="error-msg" id="error-referralChannelOther"></span>
+              </div>
+            </div>
+
+            <div class="input-group mt-4">
+              <label class="label-group-title">What made you register? <span class="optional">(Select all that apply)</span></label>
+              <div class="checkbox-card-grid">
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="I'm interested in mental health.">
+                  <span class="checkbox-box"></span>
+                  <span>Interested in mental health</span>
+                </label>
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="I'm interested in the relationship between faith and mental health.">
+                  <span class="checkbox-box"></span>
+                  <span>Relationship between faith & mental health</span>
+                </label>
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="I want to learn how to support others.">
+                  <span class="checkbox-box"></span>
+                  <span>Want to learn how to support others</span>
+                </label>
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="Personal interest/experience.">
+                  <span class="checkbox-box"></span>
+                  <span>Personal interest / experience</span>
+                </label>
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="Professional development.">
+                  <span class="checkbox-box"></span>
+                  <span>Professional development</span>
+                </label>
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="Recommended by someone.">
+                  <span class="checkbox-box"></span>
+                  <span>Recommended by someone</span>
+                </label>
+                <label class="option-card checkbox-card">
+                  <input type="checkbox" name="reasons" value="Other." id="reasons-other-checkbox">
+                  <span class="checkbox-box"></span>
+                  <span>Other (please specify)</span>
+                </label>
+              </div>
+              <span class="error-msg" id="error-reasons"></span>
+
+              <div class="conditional-input hide" id="reasons-other-container">
+                <input type="text" id="reasonsOther" name="reasonsOther" placeholder="Please specify your reasons">
+                <span class="error-msg" id="error-reasonsOther"></span>
+              </div>
+            </div>
+
+            <div class="input-group mt-4">
+              <label class="label-group-title">Which topic are you most interested in? <span class="required">*</span></label>
+              <div class="radio-card-list">
+                <label class="option-row">
+                  <input type="radio" name="topicOfInterest" value="Can a Christian struggle with mental illness?" required>
+                  <span class="icon-span">🌱</span>
+                  <span class="option-label">Can a Christian struggle with mental illness?</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="topicOfInterest" value="What is mental illness? What causes it, and how can I recognize it?">
+                  <span class="icon-span">💡</span>
+                  <span class="option-label">What is mental illness? What causes it, and how can I recognize it?</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="topicOfInterest" value="Should Christians seek therapy or other professional mental health support?">
+                  <span class="icon-span">🤝</span>
+                  <span class="option-label">Should Christians seek therapy or other professional mental health support?</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="topicOfInterest" value="How can churches, families, and Christian communities support people living with mental illness?">
+                  <span class="icon-span">⛪</span>
+                  <span class="option-label">How can churches, families, and Christian communities support people living with mental illness?</span>
+                </label>
+                <label class="option-row">
+                  <input type="radio" name="topicOfInterest" value="Can people recover from mental illness? Is there hope for healing?">
+                  <span class="icon-span">🌅</span>
+                  <span class="option-label">Can people recover from mental illness? Is there hope for healing?</span>
+                </label>
+              </div>
+              <span class="error-msg" id="error-topicOfInterest"></span>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-secondary btn-prev">Back</button>
+              <button type="button" class="btn btn-primary btn-next">
+                <span>Continue</span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Q&A & Pre-Assessment -->
+          <div class="form-step" id="step-4">
+            <div class="step-header">
+              <span class="step-badge">Step 04 of 05</span>
+              <h2 class="step-title">Survey & Q&A</h2>
+              <p class="step-desc">Your answers help our speakers prepare for common questions about faith and mental illness.</p>
+            </div>
+
+            <div class="input-group">
+              <label for="speakerQuestion">Is there any question you would like the speakers to answer during the webinar? <span class="optional">(Long answer)</span></label>
+              <textarea id="speakerQuestion" name="speakerQuestion" rows="3" placeholder="Type your question here (max 500 characters)..."></textarea>
+              <span class="error-msg" id="error-speakerQuestion"></span>
+            </div>
+
+            <div class="input-group mt-4">
+              <label class="label-group-title">Have you attended a mental health webinar before? <span class="required">*</span></label>
+              <div class="radio-card-grid">
+                <label class="option-card">
+                  <input type="radio" name="attendedBefore" value="Yes" required>
+                  <span>Yes</span>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="attendedBefore" value="No">
+                  <span>No</span>
+                </label>
+              </div>
+              <span class="error-msg" id="error-attendedBefore"></span>
+            </div>
+
+            <!-- Pre-Assessment Serene Likert Cards -->
+            <div class="input-group mt-4">
+              <label class="label-group-title">Pre-Assessment: How much do you agree with the following? <span class="required">*</span></label>
+              <p class="section-sub-desc">There are no wrong answers. Please answer as honestly as you can.</p>
+              
+              <div class="likert-container">
+                <!-- Row 1 -->
+                <div class="likert-row">
+                  <div class="likert-statement">1. Christians can experience mental illness.</div>
+                  <div class="likert-options">
+                    <label class="likert-btn btn-sa"><input type="radio" name="preAssessmentQ1" value="Strongly Agree" required><span>Strongly Agree</span></label>
+                    <label class="likert-btn btn-a"><input type="radio" name="preAssessmentQ1" value="Agree"><span>Agree</span></label>
+                    <label class="likert-btn btn-n"><input type="radio" name="preAssessmentQ1" value="Neutral"><span>Neutral</span></label>
+                    <label class="likert-btn btn-d"><input type="radio" name="preAssessmentQ1" value="Disagree"><span>Disagree</span></label>
+                    <label class="likert-btn btn-sd"><input type="radio" name="preAssessmentQ1" value="Strongly Disagree"><span>Strongly Disagree</span></label>
+                  </div>
+                </div>
+                <span class="error-msg" id="error-preAssessmentQ1"></span>
+
+                <!-- Row 2 -->
+                <div class="likert-row">
+                  <div class="likert-statement">2. Mental illness is a sign of weak faith.</div>
+                  <div class="likert-options">
+                    <label class="likert-btn btn-sa"><input type="radio" name="preAssessmentQ2" value="Strongly Agree" required><span>Strongly Agree</span></label>
+                    <label class="likert-btn btn-a"><input type="radio" name="preAssessmentQ2" value="Agree"><span>Agree</span></label>
+                    <label class="likert-btn btn-n"><input type="radio" name="preAssessmentQ2" value="Neutral"><span>Neutral</span></label>
+                    <label class="likert-btn btn-d"><input type="radio" name="preAssessmentQ2" value="Disagree"><span>Disagree</span></label>
+                    <label class="likert-btn btn-sd"><input type="radio" name="preAssessmentQ2" value="Strongly Disagree"><span>Strongly Disagree</span></label>
+                  </div>
+                </div>
+                <span class="error-msg" id="error-preAssessmentQ2"></span>
+
+                <!-- Row 3 -->
+                <div class="likert-row">
+                  <div class="likert-statement">3. Prayer alone is enough to treat every mental illness.</div>
+                  <div class="likert-options">
+                    <label class="likert-btn btn-sa"><input type="radio" name="preAssessmentQ3" value="Strongly Agree" required><span>Strongly Agree</span></label>
+                    <label class="likert-btn btn-a"><input type="radio" name="preAssessmentQ3" value="Agree"><span>Agree</span></label>
+                    <label class="likert-btn btn-n"><input type="radio" name="preAssessmentQ3" value="Neutral"><span>Neutral</span></label>
+                    <label class="likert-btn btn-d"><input type="radio" name="preAssessmentQ3" value="Disagree"><span>Disagree</span></label>
+                    <label class="likert-btn btn-sd"><input type="radio" name="preAssessmentQ3" value="Strongly Disagree"><span>Strongly Disagree</span></label>
+                  </div>
+                </div>
+                <span class="error-msg" id="error-preAssessmentQ3"></span>
+
+                <!-- Row 4 -->
+                <div class="likert-row">
+                  <div class="likert-statement">4. Seeking therapy shows a lack of trust in God.</div>
+                  <div class="likert-options">
+                    <label class="likert-btn btn-sa"><input type="radio" name="preAssessmentQ4" value="Strongly Agree" required><span>Strongly Agree</span></label>
+                    <label class="likert-btn btn-a"><input type="radio" name="preAssessmentQ4" value="Agree"><span>Agree</span></label>
+                    <label class="likert-btn btn-n"><input type="radio" name="preAssessmentQ4" value="Neutral"><span>Neutral</span></label>
+                    <label class="likert-btn btn-d"><input type="radio" name="preAssessmentQ4" value="Disagree"><span>Disagree</span></label>
+                    <label class="likert-btn btn-sd"><input type="radio" name="preAssessmentQ4" value="Strongly Disagree"><span>Strongly Disagree</span></label>
+                  </div>
+                </div>
+                <span class="error-msg" id="error-preAssessmentQ4"></span>
+
+                <!-- Row 5 -->
+                <div class="likert-row">
+                  <div class="likert-statement">5. I know where to seek professional mental health help if needed.</div>
+                  <div class="likert-options">
+                    <label class="likert-btn btn-sa"><input type="radio" name="preAssessmentQ5" value="Strongly Agree" required><span>Strongly Agree</span></label>
+                    <label class="likert-btn btn-a"><input type="radio" name="preAssessmentQ5" value="Agree"><span>Agree</span></label>
+                    <label class="likert-btn btn-n"><input type="radio" name="preAssessmentQ5" value="Neutral"><span>Neutral</span></label>
+                    <label class="likert-btn btn-d"><input type="radio" name="preAssessmentQ5" value="Disagree"><span>Disagree</span></label>
+                    <label class="likert-btn btn-sd"><input type="radio" name="preAssessmentQ5" value="Strongly Disagree"><span>Strongly Disagree</span></label>
+                  </div>
+                </div>
+                <span class="error-msg" id="error-preAssessmentQ5"></span>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-secondary btn-prev">Back</button>
+              <button type="button" class="btn btn-primary btn-next">
+                <span>Continue</span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 5: Consent -->
+          <div class="form-step" id="step-5">
+            <div class="step-header">
+              <span class="step-badge">Step 05 of 05</span>
+              <h2 class="step-title">Consent & Joining</h2>
+              <p class="step-desc">Please review and accept the agreements below to complete your registration.</p>
+            </div>
+
+            <div class="consent-block">
+              <label class="option-row checkbox-card">
+                <input type="checkbox" name="consentUpdates" id="consentUpdates" required>
+                <span class="checkbox-box"></span>
+                <span class="consent-text">I agree to receive webinar reminders, future Mind You event updates, and educational mental health resources. <span class="required">*</span></span>
+              </label>
+              <span class="error-msg" id="error-consentUpdates"></span>
+            </div>
+
+            <div class="consent-block mt-4">
+              <label class="option-row checkbox-card">
+                <input type="checkbox" name="consentRecording" id="consentRecording" required>
+                <span class="checkbox-box"></span>
+                <span class="consent-text">I understand that this webinar may be recorded for educational purposes. <span class="required">*</span></span>
+              </label>
+              <span class="error-msg" id="error-consentRecording"></span>
+            </div>
+
+            <div id="general-form-error" class="general-error hide"></div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-secondary btn-prev">Back</button>
+              <button type="submit" class="btn btn-gold" id="submit-btn">
+                <span class="btn-text">Complete Registration</span>
+                <div class="spinner hide" id="btn-spinner"></div>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- SUCCESS SCREEN -->
+      <div id="success-container" class="hide">
+        <div class="success-icon-wrapper">
+          <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+        <h2 class="success-heading">Thank You for Registering!</h2>
+        <p class="success-intro">You are registered for the Mind You Mental Health Webinar Series 2026 — Session 1.</p>
+        
+        <div class="details-card">
+          <div class="details-subtitle">Theme &amp; Topic</div>
+          <h3 class="details-theme">Faith and Mental Health</h3>
+          <p class="details-topic">Can a Christian struggle with mental illness?</p>
+          <div class="details-meta">
+            <div><strong>Hosted by:</strong> Mind You Mental Health</div>
+            <div><strong>Next step:</strong> A confirmation email with webinar details and access links will be sent shortly.</div>
+          </div>
+        </div>
+        
+        <p class="success-instructions">
+          Please check your inbox (and spam folder if needed). We look forward to learning with you.
+        </p>
+        
+        <p class="success-footer">You're not alone. Faith and mental health support can work together.</p>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      &copy; 2026 Mind You Mental Health · Faith and Mental Health Webinar Series
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
