@@ -30,7 +30,7 @@ cp .env.example .env
 | `SMTP_USER` | For email | SMTP username |
 | `SMTP_PASS` | For email | SMTP password / app password |
 | `SMTP_FROM` | No | From address (defaults to `SMTP_USER`) |
-| `NOTIFY_EMAIL` | No | Defaults to `mindyou968@gmail.com` |
+| `NOTIFY_EMAIL` | No | Defaults to `mind@gmail.com` |
 
 ## Registration email notifications
 
@@ -49,7 +49,7 @@ SMTP_SECURE=false
 SMTP_USER=your@gmail.com
 SMTP_PASS=your-16-char-app-password
 SMTP_FROM="Mind You Mental Health <your@gmail.com>"
-NOTIFY_EMAIL=mindyou968@gmail.com
+NOTIFY_EMAIL=mind@gmail.com
 ```
 
 ## Local setup
